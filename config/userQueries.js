@@ -1,14 +1,26 @@
 import { query } from "./dbQuery.js";
 
-export const getAllCountriesQuery = async (page = 1, limit = 10) => {
-    const offset = (page - 1) * limit;
+export const getAllCountriesQuery = async () => {
 
     try {
-        const result = await query("SELECT * FROM countries LIMIT $1 OFFSET $2;", [
-            limit,
-            offset,
-        ]);
+        const result = await query(`
+            SELECT
+                c.id,
+                c.name_common,
+                c.name_official,
+                c.population,
+                c.region,
+                c.capital,
+                c.subregion,
+                cn.language_code,
+                cn.name_common AS native_name_common,
+                cn.name_official AS native_name_official
+            FROM countries c
+            LEFT JOIN country_names cn ON c.id = cn.country_id;
+            `, []);
+
         return result.rows;
+
     } catch (err) {
         console.error("Error fetching countries:", err);
         throw new Error("Could not fetch countries");
@@ -22,22 +34,6 @@ export const getCountryByIdQuery = async (id) => {
     } catch (err) {
         console.error("Error fetching country:", err);
         throw new Error("Could not fetch country");
-    }
-};
-
-export const createCountryQuery = async (data) => {
-
-    const { name, description, population, region, capital, subregion } = data;
-
-    try {
-        const result = await query(
-            "INSERT INTO countries (name, description, population, region, capital, subregion) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;",
-            [name, description, population, region, capital, subregion]
-        );
-        return result.rows[0];
-    } catch (err) {
-        console.error("Error creating country:", err);
-        throw new Error("Could not create country");
     }
 };
 

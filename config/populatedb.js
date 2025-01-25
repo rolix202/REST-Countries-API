@@ -54,7 +54,8 @@ const createTables = async () => {
         await client.query(`
             CREATE TABLE IF NOT EXISTS countries (
                 id SERIAL PRIMARY KEY,
-                name VARCHAR (255) NOT NULL UNIQUE,
+                name_common VARCHAR (255) NOT NULL UNIQUE,
+                name_official VARCHAR (255) NOT NULL UNIQUE,
                 population INT NOT NULL,
                 region VARCHAR (255) NOT NULL,
                 capital VARCHAR (255) UNIQUE NOT NULL,
@@ -63,7 +64,19 @@ const createTables = async () => {
             );`
         );
 
-            console.log("Table created successfully.");
+            console.log("Countries table created successfully.");
+
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS country_names (
+                    country_id INT REFERENCES countries(id) ON DELETE CASCADE,
+                    language_code VARCHAR (10) NOT NULL,
+                    name_common VARCHAR(255) NOT NULL,
+                    name_official VARCHAR(255) NOT NULL,
+                    PRIMARY KEY (country_id, language_code)
+                );`
+            );
+    
+                console.log("Country_Names table created successfully.");
             
         client.release()
     } catch (error) {
