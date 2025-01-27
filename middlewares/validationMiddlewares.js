@@ -1,4 +1,4 @@
-import { body, validationResult } from "express-validator";
+import { body, param, validationResult } from "express-validator";
 
 const withValidationMessage = (whatToValidate) => {
     return [...whatToValidate, (req, res, next) => {
@@ -79,5 +79,13 @@ export const validateCountryInputs = withValidationMessage([
         .withMessage("Language code must be 10 characters or less.")
         .matches(/^[a-z]{2,3}(-[A-Z]{2,3})?$/)
         .withMessage("Invalid language code format (e.g., 'eng' or 'en-US')."),
+])
+
+export const validateCountryParams = withValidationMessage([
+    param('identifier')
+        .notEmpty()
+        .withMessage('Identifier is required.')
+        .isString()
+        .withMessage('Invalid identifier format.'),
 ])
 

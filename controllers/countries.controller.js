@@ -108,20 +108,48 @@ export const createCountry = async (req, res) => {
 
 export const getCountryById = async (req, res) => {
 
+    const { identifier } = req.params
+
     try {
-        const country = await getCountryByIdQuery(req.params.id)
-        
-        console.log(country);
+        const isNumeric = /^\d+$/.test(identifier);
+        const countryId = isNumeric ? identifier : null;
+        const name = !isNumeric ? identifier : null;
 
-        const counrty_name = await getCountryNamesQuery(country.id)
-        
-        console.log("==================================");
+        let countryResult;
 
-        console.log(counrty_name);
-        
-        
+        if (countryId) {
+            countryResult = await getCountryByIdQuery("id", countryId)
+        } else if (name){
+            countryResult = await getCountryByIdQuery("name_common", name)
+        }
 
+        const country_name = await getCountryNamesQuery(countryResult.id)
+
+        const nativeName = {}
+
+        for (const row of country_name){
+            nativeName[row.language_code] = {
+                "common": toSentenceCase(row.name_common),
+                "official": toSentenceCase(row.name_official)
+            }  
+        }
+
+       const country = {
+        "name" : {
+            "common": toSentenceCase(countryResult.name_common),
+            "official": toSentenceCase(countryResult.name_official),
+            nativeName 
+        },
+        "population": countryResult.population,
+        "region": toSentenceCase(countryResult.region),
+        "capital": toSentenceCase(countryResult.capital),
+        "subregion": toSentenceCase(countryResult.subregion)
+       }
+
+       res.status(200).json(country)
+        
     } catch (error) {
-        
+        console.error("Error fetching country:", err);
+        res.status(500).json({ error: "Internal server error." });
     }
 }
