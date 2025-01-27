@@ -27,15 +27,25 @@ export const getAllCountriesQuery = async () => {
     }
 };
 
-export const getCountryByIdQuery = async (id) => {
+export const getCountryByIdQuery = async (data) => {
     try {
-        const result = await query("SELECT * FROM countries WHERE id = $1;", [id]);
+        const result = await query(`SELECT * FROM countries WHERE id =  $1`, [data]);
         return result.rows[0];
     } catch (err) {
         console.error("Error fetching country:", err);
         throw new Error("Could not fetch country");
     }
 };
+
+export const getCountryNamesQuery = async (data) => {
+    try {
+        const result = await query(`SELECT * FROM country_names WHERE country_id = $1`, [data])
+        return result.rows[0];
+    } catch (error) {
+        console.error("Error fetching country:", err);
+        throw new Error("Could not fetch country");
+    }
+}
 
 export const updateCountryQuery = async (id, data) => {
    

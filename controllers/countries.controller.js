@@ -1,5 +1,6 @@
 import { query } from "../config/dbQuery.js";
-import { getAllCountriesQuery } from "../config/userQueries.js"
+import { getAllCountriesQuery, getCountryByIdQuery, getCountryNamesQuery } from "../config/userQueries.js"
+import { toSentenceCase } from "../utils/toSentenceCase.js";
 
 export const getAllCountries = async (req, res) => {
     try {
@@ -13,22 +14,22 @@ export const getAllCountries = async (req, res) => {
         if (!acc[countryId]) {
             acc[countryId] = {
                 name: {
-                    common: row.name_common,
-                    official: row.name_official,
+                    common: toSentenceCase(row.name_common),
+                    official: toSentenceCase(row.name_official),
                     nativeName: {}
                 },
                 population: row.population,
-                region: row.region,
-                capital: row.capital,
-                subregion: row.subregion
+                region: toSentenceCase(row.region),
+                capital: toSentenceCase(row.capital),
+                subregion: toSentenceCase(row.subregion)
             };
         }
     
         // Add the native name for the given language code
         if (row.language_code) {
             acc[countryId].name.nativeName[row.language_code] = {
-                common: row.native_name_common,
-                official: row.native_name_official
+                common: toSentenceCase(row.native_name_common),
+                official: toSentenceCase(row.native_name_official)
             };
         }
     
@@ -104,3 +105,23 @@ export const createCountry = async (req, res) => {
         return res.status(500).json({ error: "Failed to create country" });
     }
 };
+
+export const getCountryById = async (req, res) => {
+
+    try {
+        const country = await getCountryByIdQuery(req.params.id)
+        
+        console.log(country);
+
+        const counrty_name = await getCountryNamesQuery(country.id)
+        
+        console.log("==================================");
+
+        console.log(counrty_name);
+        
+        
+
+    } catch (error) {
+        
+    }
+}
