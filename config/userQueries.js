@@ -1,4 +1,26 @@
+import { hashPassword } from "../utils/hashPassword.js";
 import { query } from "./dbQuery.js";
+
+export const createUserQuery = async (data) => {
+    const { first_name, last_name, email, password } = data
+
+    const hashedPassword = await hashPassword(password)
+    
+    try {
+        const response = await query("INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *", [first_name, last_name, email, hashedPassword])
+
+        const { password: hashedPasswordFromDb, created_at, updated_at, ...userWithoutPassword } = response.rows[0];
+        
+        return userWithoutPassword;
+        
+    } catch (error) {
+        console.error("Error creating user:", error.message);
+        if (error.code === "23505") {
+            throw new Error("Email already exists");
+        }
+        throw new Error("Failed to create user");
+    }
+}
 
 export const getAllCountriesQuery = async () => {
 

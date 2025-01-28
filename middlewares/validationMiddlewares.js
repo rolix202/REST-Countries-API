@@ -1,4 +1,5 @@
 import { body, param, validationResult } from "express-validator";
+import { query } from "../config/dbQuery.js";
 
 const withValidationMessage = (whatToValidate) => {
     return [...whatToValidate, (req, res, next) => {
@@ -12,7 +13,6 @@ const withValidationMessage = (whatToValidate) => {
         next()
     }]
 }
-
 
 export const validateCountryInputs = withValidationMessage([
     body("name_common")
@@ -87,5 +87,33 @@ export const validateCountryParams = withValidationMessage([
         .withMessage('Identifier is required.')
         .isString()
         .withMessage('Invalid identifier format.'),
+])
+
+export const authValidation = withValidationMessage([
+        body("first_name")
+            .notEmpty()
+            .withMessage("First name is required")
+            .trim()
+            .escape(),
+        body("last_name")
+            .notEmpty()
+            .withMessage("Last name is required")
+            .trim()
+            .escape(),
+        body("email")
+            .notEmpty()
+            .withMessage("Email is required")
+            .trim()
+            .isEmail()
+            .withMessage("Not a valid email address")
+            .custom(async (value) => {
+                const emailExist = await query("SELECT 1 FROM users WHERE email = $1", [value]);
+                if (emailExist.rowCount > 0) {
+                    throw new Error("Email already exists");
+                }
+            }),
+        body("password")
+            .isLength({ min: 8 })
+            .withMessage("Password must be at least 8 characters long")
 ])
 

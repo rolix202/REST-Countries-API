@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 
 // local imports
 import countriesRoute from "./routes/countries.route.js"
+import authRoute from "./routes/auth.route.js"
 
 dotenv.config()
 const app = express()
@@ -11,6 +12,7 @@ const app = express()
 app.use(morgan("dev"))
 app.use(express.json())
 
+app.use("/api/v1/auth", authRoute)
 app.use("/api/v1/countries", countriesRoute)
 
 const PORT = process.env.PORT 
