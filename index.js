@@ -1,11 +1,12 @@
 import express from "express"
 import morgan from "morgan";
 import dotenv from "dotenv"
+import cookieParser from "cookie-parser";
 
 // local imports
 import countriesRoute from "./routes/countries.route.js"
 import authRoute from "./routes/auth.route.js"
-import cookieParser from "cookie-parser";
+
 
 dotenv.config()
 const app = express()
