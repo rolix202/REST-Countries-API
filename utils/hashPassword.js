@@ -11,3 +11,14 @@ export const hashPassword = async (pass) => {
         throw new Error("Error hashing password")
     }
 }
+
+export const verifyPassword = async (passUser, passDB) => {
+    try {
+        const passVerify = await bcrypt.compare(passUser, passDB)
+
+        return passVerify;
+    } catch (error) {
+        console.log("Error hashing password", error.message);
+        throw new Error("Error hashing password")
+    }
+}

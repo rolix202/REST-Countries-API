@@ -1,4 +1,4 @@
-import { hashPassword } from "../utils/hashPassword.js";
+import { hashPassword, verifyPassword } from "../utils/hashPassword.js";
 import { query } from "./dbQuery.js";
 
 export const createUserQuery = async (data) => {
@@ -21,6 +21,34 @@ export const createUserQuery = async (data) => {
         throw new Error("Failed to create user");
     }
 }
+
+export const loginQuery = async (data) => {
+    const { email, password } = data;
+
+    try {
+        const result = await query("SELECT * FROM users WHERE email = $1", [email]);
+
+        if (result.rows.length === 0) {
+            throw new Error("Invalid email or password");
+        }
+
+        const user = result.rows[0];
+
+        const isPasswordValid = await verifyPassword(password, user.password);
+
+        if (!isPasswordValid) {
+            throw new Error("Invalid email or password");
+        }
+
+        const { password: _, created_at, updated_at, ...userWithoutPassword } = user;
+
+        return userWithoutPassword;
+
+    } catch (error) {
+        console.error("Login error:", error.message);
+        throw new Error("Login failed");
+    }
+};
 
 export const getAllCountriesQuery = async () => {
 
