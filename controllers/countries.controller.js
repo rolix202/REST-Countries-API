@@ -1,5 +1,5 @@
 import { query } from "../config/dbQuery.js";
-import { getAllCountriesQuery, getCountryByIdQuery, getCountryNamesQuery } from "../config/userQueries.js"
+import { deleteCountryQuery, getAllCountriesQuery, getCountryByIdQuery, getCountryNamesQuery } from "../config/userQueries.js"
 import { toSentenceCase } from "../utils/toSentenceCase.js";
 
 export const getAllCountries = async (req, res) => {
@@ -25,7 +25,6 @@ export const getAllCountries = async (req, res) => {
             };
         }
     
-        // Add the native name for the given language code
         if (row.language_code) {
             acc[countryId].name.nativeName[row.language_code] = {
                 common: toSentenceCase(row.native_name_common),
@@ -36,7 +35,6 @@ export const getAllCountries = async (req, res) => {
         return acc;
     }, {});
     
-    // converted the object back into an array of countries
     const formattedCountries = Object.values(countries)
 
     res.status(200).json(formattedCountries);
@@ -121,6 +119,12 @@ export const getCountryById = async (req, res) => {
             countryResult = await getCountryByIdQuery("id", countryId)
         } else if (name){
             countryResult = await getCountryByIdQuery("name_common", name)
+        } else {
+            return res.status(400).json({ message: "Country Id or name required." })
+        }
+        
+        if (!countryResult){
+            return res.status(404).json({ message: "Country not found." })
         }
 
         const country_name = await getCountryNamesQuery(countryResult.id)
@@ -134,7 +138,7 @@ export const getCountryById = async (req, res) => {
             }  
         }
 
-       const country = {
+       const country = [{
         "name" : {
             "common": toSentenceCase(countryResult.name_common),
             "official": toSentenceCase(countryResult.name_official),
@@ -144,12 +148,48 @@ export const getCountryById = async (req, res) => {
         "region": toSentenceCase(countryResult.region),
         "capital": toSentenceCase(countryResult.capital),
         "subregion": toSentenceCase(countryResult.subregion)
-       }
-
+       }]
+       
        res.status(200).json(country)
         
     } catch (error) {
-        console.error("Error fetching country:", err);
+        console.error("Error fetching country:", error);
         res.status(500).json({ error: "Internal server error." });
     }
+}
+
+export const deleteCountrybyId = async (req, res) => {
+    
+    try {
+        const { identifier } = req.params
+
+        const isNumeric = /^\d+$/.test(identifier)
+        const countryId = isNumeric ? identifier : null
+        const name = !isNumeric ? identifier: null
+
+        let countryResult;
+
+        if (countryId) {
+            countryResult = await deleteCountryQuery("id", countryId)
+        } else if (name) {
+            countryResult = await deleteCountryQuery("name_common", name)
+        } else {
+            return res.status(400).json({ message: "Country id or name required" })
+        }
+        
+        if (!countryResult){
+            return res.status(404).json({ message: "Country not found" })
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Country deleted successfully",
+            data: countryResult
+        })
+        
+    } catch (error) {
+        console.error("Error fetching country:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+    
 }

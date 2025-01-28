@@ -30,7 +30,7 @@ export const getAllCountriesQuery = async () => {
 export const getCountryByIdQuery = async (field_name, data) => {
 
     try {
-        const result = await query(`SELECT * FROM countries WHERE ${field_name} =  $1`, [data]);
+        const result = await query(`SELECT * FROM countries WHERE LOWER(${field_name}) =  LOWER($1)`, [data]);
         return result.rows[0];
     } catch (err) {
         console.error("Error fetching country:", err);
@@ -48,25 +48,9 @@ export const getCountryNamesQuery = async (data) => {
     }
 }
 
-export const updateCountryQuery = async (id, data) => {
-   
-    const { name, description, population, region, capital, subregion } = data;
-
+export const deleteCountryQuery = async (field_name, data) => {
     try {
-        const result = await query(
-            "UPDATE countries SET name = $1, description = $2, population = $3, region = $4, capital = $5, subregion = $6 WHERE id = $7 RETURNING *;",
-            [name, description, population, region, capital, subregion, id]
-        );
-        return result.rows[0];
-    } catch (err) {
-        console.error("Error updating country:", err);
-        throw new Error("Could not update country");
-    }
-};
-
-export const deleteCountryQuery = async (id) => {
-    try {
-        const result = await query("DELETE FROM countries WHERE id = $1 RETURNING *;", [id]);
+        const result = await query(`DELETE FROM countries WHERE ${field_name} = $1 RETURNING *;`, [data]);
         return result.rows[0];
     } catch (err) {
         console.error("Error deleting country:", err);
