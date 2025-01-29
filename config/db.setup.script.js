@@ -94,7 +94,7 @@ const createTables = async () => {
         console.log("user table created successfully");
 
         // Trigger to update `updated_at` on users table
-    await client.query(`
+        await client.query(`
         CREATE OR REPLACE FUNCTION update_timestamp()
         RETURNS TRIGGER AS $$
         BEGIN
@@ -108,8 +108,8 @@ const createTables = async () => {
         FOR EACH ROW
         EXECUTE FUNCTION update_timestamp();
       `);
-      console.log("Trigger for updating timestamps created successfully.");
-  
+        console.log("Trigger for updating timestamps created successfully.");
+
 
         client.release();
     } catch (error) {

@@ -1,8 +1,9 @@
 import { query } from "../config/dbQuery.js";
 import { deleteCountryQuery, getAllCountriesQuery, getCountryByIdQuery, getCountryNamesQuery } from "../config/userQueries.js"
+import AppError from "../utils/customError.js";
 import { toSentenceCase } from "../utils/toSentenceCase.js";
 
-export const getAllCountries = async (req, res) => {
+export const getAllCountries = async (req, res, next) => {
     try {
         const result = await getAllCountriesQuery()
         
@@ -44,7 +45,7 @@ export const getAllCountries = async (req, res) => {
     }
 }
 
-export const createCountry = async (req, res) => {
+export const createCountry = async (req, res, next) => {
     const { 
         name_common, name_official, population, region, capital, subregion, 
         nativeNames
@@ -106,7 +107,7 @@ export const createCountry = async (req, res) => {
     }
 };
 
-export const getCountryById = async (req, res) => {
+export const getCountryById = async (req, res, next) => {
 
     const { identifier } = req.params
 
@@ -159,7 +160,7 @@ export const getCountryById = async (req, res) => {
     }
 }
 
-export const deleteCountrybyId = async (req, res) => {
+export const deleteCountrybyId = async (req, res, next) => {
     
     try {
         const { identifier } = req.params

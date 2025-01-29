@@ -1,7 +1,7 @@
 import { createUserQuery, loginQuery } from "../config/userQueries.js"
 import { signJwt } from "../utils/jwt.cookie.js";
 
-export const createUser = async (req, res) => {
+export const createUser = async (req, res, next) => {
     try {
         const user = await createUserQuery(req.body)
         
@@ -18,7 +18,7 @@ export const createUser = async (req, res) => {
     
 }
 
-export const loginUser = async (req, res) => {
+export const loginUser = async (req, res, next) => {
     
     try {
         const user = await loginQuery(req.body)
