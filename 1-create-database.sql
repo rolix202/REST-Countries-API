@@ -1,4 +1,4 @@
-CREATE DATABASE db_countries_api;
+CREATE DATABASE orangedb;
 
 
 

@@ -21,9 +21,7 @@ export const globalErrorHandler = (err, req, res, next) => {
     }
 
     const statusCode = err.statusCode || 500; 
-    const message = process.env.NODE_ENV === "production"
-        ? "Something went wrong. Please try again later."
-        : err.message; 
+    const message = err.message || 'something went wrong, try again later'; 
 
     
     res.status(statusCode).json({

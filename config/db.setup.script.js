@@ -110,6 +110,33 @@ const createTables = async () => {
       `);
         console.log("Trigger for updating timestamps created successfully.");
 
+        await client.query(`
+            -- Function to assign 'admin' role to the first user
+CREATE OR REPLACE FUNCTION assign_admin_role()
+RETURNS TRIGGER AS $$
+DECLARE
+    user_count INT;
+BEGIN
+    -- Check the number of users currently in the table
+    SELECT COUNT(*) INTO user_count FROM users;
+
+    -- If no users exist, set the role to 'admin'
+    IF user_count = 0 THEN
+        NEW.role := 'admin';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to call the assign_admin_role function on INSERT
+CREATE TRIGGER trigger_assign_admin_role
+BEFORE INSERT ON users
+FOR EACH ROW
+EXECUTE FUNCTION assign_admin_role();
+        `);
+
+        console.log("Trigger for admin assign created successfully.");
 
         client.release();
     } catch (error) {
