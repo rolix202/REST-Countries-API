@@ -40,8 +40,7 @@ export const getAllCountries = async (req, res) => {
     res.status(200).json(formattedCountries);
 
     } catch (error) {
-        console.error("Error fetching countries:", error);
-        throw new Error("Could not fetch countries");
+        next(error)
     }
 }
 
@@ -59,6 +58,10 @@ export const createCountry = async (req, res) => {
         `, [name_common, name_official, population, region, capital, subregion]);
 
         const countryId = insertCountryResult.rows[0].id;
+
+        if (!countryId) {
+            throw new AppError("Failed to insert country into the database", 500);
+        }
 
         const insertNativeNamesPromises = nativeNames.map(async (nativeName) => {
             const { language_code, name_common: nativeNameCommon, name_official: nativeNameOfficial } = nativeName;
@@ -98,9 +101,8 @@ export const createCountry = async (req, res) => {
 
         return res.status(201).json(createdCountry);
 
-    } catch (err) {
-        console.error("Error creating country:", err);
-        return res.status(500).json({ error: "Failed to create country" });
+    } catch (error) {
+        next(error)
     }
 };
 
@@ -124,7 +126,7 @@ export const getCountryById = async (req, res) => {
         }
         
         if (!countryResult){
-            return res.status(404).json({ message: "Country not found." })
+            throw new AppError("Country not found.", 404);
         }
 
         const country_name = await getCountryNamesQuery(countryResult.id)
@@ -153,8 +155,7 @@ export const getCountryById = async (req, res) => {
        res.status(200).json(country)
         
     } catch (error) {
-        console.error("Error fetching country:", error);
-        res.status(500).json({ error: "Internal server error." });
+        next(error)
     }
 }
 
@@ -178,7 +179,7 @@ export const deleteCountrybyId = async (req, res) => {
         }
         
         if (!countryResult){
-            return res.status(404).json({ message: "Country not found" })
+            throw new AppError("Country not found.", 404);
         }
 
         res.status(200).json({
@@ -188,8 +189,7 @@ export const deleteCountrybyId = async (req, res) => {
         })
         
     } catch (error) {
-        console.error("Error fetching country:", error);
-        res.status(500).json({ error: "Internal server error." });
+        next(error)
     }
     
 }

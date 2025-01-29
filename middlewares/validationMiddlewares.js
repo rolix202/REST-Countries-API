@@ -7,7 +7,10 @@ const withValidationMessage = (whatToValidate) => {
 
         if (!errors.isEmpty()){
             const errorMessage = errors.array().map(err => err.msg)
-            return res.status(400).json({ message: errorMessage })
+            return res.status(400).json({ 
+                message: "Invalid inputs", 
+                errors: errorMessage 
+            })
         }
 
         next()

@@ -1,3 +1,4 @@
+import AppError from "../utils/customError.js";
 import { hashPassword, verifyPassword } from "../utils/hashPassword.js";
 import { query } from "./dbQuery.js";
 
@@ -6,30 +7,20 @@ export const createUserQuery = async (data) => {
 
     const hashedPassword = await hashPassword(password)
     
-    try {
         const response = await query("INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *", [first_name, last_name, email, hashedPassword])
 
         const { password: hashedPasswordFromDb, created_at, updated_at, ...userWithoutPassword } = response.rows[0];
         
         return userWithoutPassword;
-        
-    } catch (error) {
-        console.error("Error creating user:", error.message);
-        if (error.code === "23505") {
-            throw new Error("Email already exists");
-        }
-        throw new Error("Failed to create user");
-    }
 }
 
 export const loginQuery = async (data) => {
     const { email, password } = data;
 
-    try {
         const result = await query("SELECT * FROM users WHERE email = $1", [email]);
 
         if (result.rows.length === 0) {
-            throw new Error("Invalid email or password");
+            throw new AppError("Invalid email or password", 401);
         }
 
         const user = result.rows[0];
@@ -37,17 +28,12 @@ export const loginQuery = async (data) => {
         const isPasswordValid = await verifyPassword(password, user.password);
 
         if (!isPasswordValid) {
-            throw new Error("Invalid email or password");
+            throw new AppError("Invalid email or password", 401);
         }
 
         const { password: _, created_at, updated_at, ...userWithoutPassword } = user;
 
         return userWithoutPassword;
-
-    } catch (error) {
-        console.error("Login error:", error.message);
-        throw new Error("Login failed");
-    }
 };
 
 export const getAllCountriesQuery = async () => {
@@ -72,8 +58,7 @@ export const getAllCountriesQuery = async () => {
         return result.rows;
 
     } catch (err) {
-        console.error("Error fetching countries:", err);
-        throw new Error("Could not fetch countries");
+        throw new AppError("Failed to fetch countries from the database", 500);
     }
 };
 
@@ -83,8 +68,7 @@ export const getCountryByIdQuery = async (field_name, data) => {
         const result = await query(`SELECT * FROM countries WHERE LOWER(${field_name}) =  LOWER($1)`, [data]);
         return result.rows[0];
     } catch (err) {
-        console.error("Error fetching country:", err);
-        throw new Error("Could not fetch country");
+        throw new AppError("Failed to fetch country from the database.", 500);
     }
 };
 
@@ -93,8 +77,7 @@ export const getCountryNamesQuery = async (data) => {
         const result = await query(`SELECT language_code, name_common, name_official FROM country_names WHERE country_id = $1`, [data])
         return result.rows;
     } catch (error) {
-        console.error("Error fetching country:", err);
-        throw new Error("Could not fetch country");
+        throw new AppError("Failed to fetch country names from the database.", 500);
     }
 }
 
@@ -103,7 +86,6 @@ export const deleteCountryQuery = async (field_name, data) => {
         const result = await query(`DELETE FROM countries WHERE ${field_name} = $1 RETURNING *;`, [data]);
         return result.rows[0];
     } catch (err) {
-        console.error("Error deleting country:", err);
-        throw new Error("Could not delete country");
+        throw new AppError("Failed to delete country from the database.", 500);
     }
 };

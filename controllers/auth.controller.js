@@ -8,8 +8,12 @@ export const createUser = async (req, res) => {
         res.status(201).json({ success: true, message: "User created successfully", user });
 
     } catch (error) {
+
         console.error("Error creating user:", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        if (error.code === "23505") {
+            throw new AppError("Email already exists", 400)
+        }
+        throw new AppError("An error occured while creating the user", 500)
     }
     
 }
@@ -36,8 +40,7 @@ export const loginUser = async (req, res) => {
 
         
     } catch (error) {
-        console.error("Error creating user:", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        next(error)
     }
     
 }

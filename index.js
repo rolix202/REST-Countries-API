@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 // local imports
 import countriesRoute from "./routes/countries.route.js"
 import authRoute from "./routes/auth.route.js"
+import { globalErrorHandler, handleInvalidRoute } from "./utils/globalErrorHandler.js";
 
 
 dotenv.config()
@@ -17,6 +18,10 @@ app.use(cookieParser())
 
 app.use("/api/v1/auth", authRoute)
 app.use("/api/v1/countries", countriesRoute)
+
+app.use(handleInvalidRoute);
+
+app.use(globalErrorHandler)
 
 const PORT = process.env.PORT 
 
